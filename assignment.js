@@ -100,21 +100,30 @@ async function fetchDataAndExportCSV() {
         Accept: "application/json",
       },
     });
-    const fields = ["Listing Id", "Listing Name", "Page Name", "Amount Per Stay"];
+   
     let results = response.data.data.searchQueries.search.results
     let filteredData = []
+    if (!results || results.length === 0) {
+        console.log("No data received from API.");
+        return;
+      }
     results.forEach((dt)=>{
-        console.table({"listing id" : dt.basicPropertyData.id, "display name" : dt.displayName.text, "pageName" : dt.basicPropertyData.pageName, "Amount per stay" : dt.priceDisplayInfoIrene?.priceBeforeDiscount.amountPerStay.amount})
-        let tempObj = {"Listing Id" : dt.basicPropertyData.id, "Listing Name" : dt.displayName.text, "Page Name" : dt.basicPropertyData.pageName, "Amount Per Stay" : dt.priceDisplayInfoIrene?.priceBeforeDiscount.amountPerStay.amount}
+        console.table({"listing id" : dt.basicPropertyData.id, 
+            "display name" : dt.displayName.text, 
+            "pageName" : dt.basicPropertyData.pageName,
+             "Amount per stay" : dt.priceDisplayInfoIrene?.priceBeforeDiscount.amountPerStay.amount})
+
+        let tempObj = {"Listing Id" : dt.basicPropertyData.id, 
+            "Listing Name" : dt.displayName.text,
+             "Page Name" : dt.basicPropertyData.pageName,
+              "Amount Per Stay" : dt.priceDisplayInfoIrene?.priceBeforeDiscount.amountPerStay.amount}
         filteredData.push(tempObj)
     })
-    if (!response.data || response.data.length === 0) {
-      console.log("No data received from API.");
-      return;
-    }
+   
+    const fields = ["Listing Id", "Listing Name", "Page Name", "Amount Per Stay"];
     const json2csvParser = new Parser({ fields });
     const csvData = json2csvParser.parse(filteredData);
-    const fileName = `listings_data_${new Date().getTime()}.csv`;
+    const fileName = `listings_data_${new Date().getTime()}.csv`; 
     fs.writeFileSync(fileName, csvData);
 
     console.log(`✅ CSV file "${fileName}" has been saved successfully!`);
